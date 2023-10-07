@@ -1,0 +1,377 @@
+﻿<Window x:Class="MarketSolo.View.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:converters="clr-namespace:MarketSolo.Converters"
+        mc:Ignorable="d"
+        Title="Товары"
+        Height="800"
+        Width="1600"
+        MinHeight="800"
+        MinWidth="1000">
+
+    <Window.Resources>
+        <converters:UserRoleToVisibilityConverter x:Key="UserRoleToVisibilityConverter" />
+        <converters:ImageConverter x:Key="ImageConverter" />
+
+        <Style TargetType="Button">
+            <Setter Property="FontSize" Value="30"/>
+            <Setter Property="FontFamily" Value="Segoe UI"/>
+            <Setter Property="BorderBrush" Value="AntiqueWhite"/>
+            <Setter Property="BorderThickness" Value="5"/>
+            <Setter Property="Margin" Value="15"/>
+            <Setter Property="HorizontalAlignment" Value="Stretch"/>
+            <Setter Property="Background">
+                <Setter.Value>
+                    <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
+                        <LinearGradientBrush.RelativeTransform>
+                            <TransformGroup>
+                                <RotateTransform CenterX="0.5" CenterY="0.5" Angle="50"/>
+                            </TransformGroup>
+                        </LinearGradientBrush.RelativeTransform>
+                        <GradientStop Color="#FFEDE3BF"/>
+                        <GradientStop Color="#FFEA9D7F" Offset="1"/>
+                    </LinearGradientBrush>
+                </Setter.Value>
+            </Setter>
+
+            <Style.Resources>
+                <Style TargetType="Border">
+                    <Setter Property="CornerRadius" Value="25" />
+                </Style>
+            </Style.Resources>
+        </Style>
+
+        <Style TargetType="ListView">
+            <Setter Property="Background" Value="AntiqueWhite"/>
+            <Setter Property="BorderBrush" Value="BurlyWood"/>
+            <Setter Property="BorderThickness" Value="5"></Setter>
+            <Style.Resources>
+                <Style TargetType="Border">
+                    <Setter Property="CornerRadius" Value="25" />
+                </Style>
+                <Style TargetType="ScrollViewer">
+                    <Setter Property="HorizontalScrollBarVisibility" Value="Disabled" />
+                    <Setter Property="VerticalScrollBarVisibility" Value="Disabled" />
+                </Style>
+            </Style.Resources>
+        </Style>
+
+        <Style x:Key="SearchTextBoxStyle" TargetType="TextBox">
+            <Setter Property="Text" Value="{Binding FilteredText, Mode=TwoWay}"/>
+            <Setter Property="FontSize" Value="15"/>
+            <Setter Property="TextAlignment" Value="Justify"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="Margin" Value="5"/>
+
+            <Style.Resources>
+                <Style TargetType="Border">
+                    <Setter Property="CornerRadius" Value="10" />
+                </Style>
+            </Style.Resources>
+        </Style>
+
+        <Style x:Key="StrikedTextStyle" TargetType="TextBlock">
+            <Setter Property="TextDecorations" Value="{x:Null}" />
+            <Setter Property="FontSize" Value="25"/>
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding IsPriceReduced}" Value="True">
+                    <Setter Property="TextDecorations" Value="Strikethrough" />
+                    <Setter Property="FontSize" Value="20"/>
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style x:Key="TotalPriceStyle" TargetType="TextBlock">
+            <Setter Property="Visibility" Value="Collapsed" />
+            <Setter Property="FontSize" Value="25"/>
+            <Style.Triggers>
+                <DataTrigger Binding="{Binding IsPriceReduced}" Value="True">
+                    <Setter Property="Visibility" Value="Visible" />
+                    <Setter Property="FontSize" Value="30"/>
+                </DataTrigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style x:Key="CustomListViewItemStyle" TargetType="{x:Type ListViewItem}">
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type ListViewItem}">
+                        <StackPanel Orientation="Vertical" VerticalAlignment="Stretch" Margin="15">
+                            <Border
+                                BorderThickness="10"
+                                BorderBrush="#FFB39B77"
+                                Background="{Binding CurrentBrush}"
+                                x:Name="Border">
+
+                                <Grid Margin="10">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="3*" />
+                                        <ColumnDefinition Width="10*" />
+                                        <ColumnDefinition Width="3*" />
+                                    </Grid.ColumnDefinitions>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="1*" />
+                                    </Grid.RowDefinitions>
+
+                                    <Border
+                                        BorderThickness="1">
+
+                                        <Image
+                                            Source="{Binding ImageBinary, Converter={StaticResource ImageConverter}}"
+                                            Margin="5"
+                                            Width="200"
+                                            Height="200"
+                                            VerticalAlignment="Center"
+                                            HorizontalAlignment="Center" />
+                                    </Border>
+
+                                    <Border Grid.Column="1"
+                                            BorderThickness="5" VerticalAlignment="Center">
+
+                                        <StackPanel
+                                            Margin="10">
+
+                                            <TextBlock Text="{Binding Title}"
+                                                       VerticalAlignment="Center"
+                                                       HorizontalAlignment="Left"
+                                                       FontSize="25" />
+                                            <TextBlock Text="{Binding Description}"
+                                                       VerticalAlignment="Center"
+                                                       HorizontalAlignment="Stretch"
+                                                       FontSize="16" />
+                                            <TextBlock
+                                                Text="{Binding IdManufacturerNavigation.Name, StringFormat='Производитель {0}.'}"
+                                                VerticalAlignment="Center"
+                                                HorizontalAlignment="Left"
+                                                FontSize="14" />
+
+                                            <DockPanel>
+                                                <TextBlock Text="{Binding Price, StringFormat='{}{0:C} '}" 
+                                                           Style="{StaticResource StrikedTextStyle}"/>
+
+                                                <TextBlock Text="{Binding TotalPrice, StringFormat='{}{0:C}'}" 
+                                                           Style="{StaticResource TotalPriceStyle}"
+                                                           Foreground="IndianRed"/>
+                                            </DockPanel>
+
+                                        </StackPanel>
+                                    </Border>
+
+                                    <Border Grid.Column="2"
+                                            BorderThickness="1">
+
+                                        <TextBlock Text="{Binding Count, StringFormat='На складе: {0} шт.'}"
+                                                   VerticalAlignment="Center"
+                                                   HorizontalAlignment="Center"
+                                                   Margin="10"
+                                                   FontSize="20" />
+
+                                    </Border>
+                                </Grid>
+                            </Border>
+                        </StackPanel>
+                        <ControlTemplate.Triggers>
+
+                            <DataTrigger Binding="{Binding RelativeSource={RelativeSource FindAncestor,
+                                AncestorType={x:Type Window}},Path=DataContext.UserCanSelect}" Value="False">
+                                <Setter TargetName="Border" Property="IsHitTestVisible" Value="False" />
+                            </DataTrigger>
+
+                            <Trigger Property="IsSelected" Value="True">
+                                <Setter TargetName="Border" Property="Background" Value="RosyBrown"/>
+                            </Trigger>
+
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="MenuBorderStyle" TargetType="Border">
+            <Setter Property="Background" Value="AntiqueWhite"/>
+            <Setter Property="Margin" Value="5"/>
+            <Setter Property="CornerRadius" Value="10" />
+            <Setter Property="BorderBrush" Value="BurlyWood"/>
+            <Setter Property="BorderThickness" Value="5"/>
+        </Style>
+
+        <Style x:Key="MenuItemBorderStyle" TargetType="Border">
+            <Setter Property="Background" Value="AntiqueWhite"/>
+
+        </Style>
+
+    </Window.Resources>
+
+    <Window.Background>
+        <LinearGradientBrush EndPoint="0.5,1" StartPoint="0.5,0">
+            <LinearGradientBrush.RelativeTransform>
+                <TransformGroup>
+                    <RotateTransform CenterX="0.5" CenterY="0.5" Angle="100"/>
+                </TransformGroup>
+            </LinearGradientBrush.RelativeTransform>
+            <GradientStop Color="#FFEDE3BF"/>
+            <GradientStop Color="#FFEA9D7F" Offset="1"/>
+        </LinearGradientBrush>
+    </Window.Background>
+
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="5*" />
+            <ColumnDefinition Width="5*" />
+            <ColumnDefinition Width="3.5*" />
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="13*" />
+            <RowDefinition Height="100*" />
+            <RowDefinition Height="1*" />
+        </Grid.RowDefinitions>
+
+        <Grid Grid.Row="1" 
+              Grid.Column="0" 
+              Grid.ColumnSpan="2"
+              Margin="15">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+
+            <ListView
+                x:Name="ProductsListView"
+                ItemContainerStyle="{StaticResource CustomListViewItemStyle}" Grid.ColumnSpan="3"
+                ItemsSource="{Binding Products}"
+                SelectionChanged="ProductsListView_OnSelectionChanged">
+            </ListView>
+        </Grid>
+
+        <Border Grid.Row="1" 
+                Grid.Column="2" 
+                Style="{StaticResource MenuBorderStyle}">
+
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="10*"/>
+                    <ColumnDefinition Width="10*"/>
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="3*"/>
+                    <RowDefinition Height="3*"/>
+                    <RowDefinition Height="10*"/>
+                    <RowDefinition Height="10*"/>
+                    <RowDefinition Height="10*"/>
+                </Grid.RowDefinitions>
+
+                <TextBlock 
+                Grid.Row="0" 
+                Grid.ColumnSpan="2"
+
+                FontSize="30" 
+                VerticalAlignment="Center" 
+                HorizontalAlignment="Center">
+                    <TextBlock.Text>
+                        <MultiBinding StringFormat="{}{0} из {1}">
+                            <Binding Path="Products.Count" />
+                            <Binding Path="TempProducts.Count" />
+                        </MultiBinding>
+                    </TextBlock.Text>
+                </TextBlock>
+
+                <TextBox Style="{StaticResource SearchTextBoxStyle}" 
+                     Grid.Row="1"
+                     Grid.Column="0"
+                     Grid.ColumnSpan="2"
+                     TextChanged="TextBoxBase_OnTextChanged"/>
+
+                <TextBlock Grid.Row="2"
+                               Grid.Column="0"
+                               Text="Цена"
+                               VerticalAlignment="Center"
+                               HorizontalAlignment="Center"
+                               FontSize="25" />
+
+                <ComboBox Grid.Row="2" 
+                      Grid.Column="1"
+                      Margin="5"
+                      SelectedIndex="0"
+                      FontSize="15"
+                      HorizontalAlignment="Stretch"
+                      VerticalAlignment="Center"
+                      SelectedItem="{Binding SelectedPriceSort, Mode=TwoWay}"
+                      SelectionChanged="FilterAndSortChanged_OnSelectionChanged">
+
+                    <ComboBox.Items>
+                        <ComboBoxItem Content="Нет" />
+                        <ComboBoxItem Content="По возрастанию цены" />
+                        <ComboBoxItem Content="По убыванию цены" />
+                    </ComboBox.Items>
+                </ComboBox>
+
+                <TextBlock Grid.Row="4"
+                           Grid.Column="0"
+                           Text="Скидка"
+                           VerticalAlignment="Center"
+                           HorizontalAlignment="Center" 
+                           FontSize="25" />
+
+                <ComboBox Grid.Row="4" 
+                      Grid.Column="1"
+                      Margin="5"
+                      SelectedIndex="0"
+                      FontSize="15"
+                      HorizontalAlignment="Stretch"
+                      VerticalAlignment="Center"
+                      SelectedItem="{Binding SelectedDiscountRange, Mode=TwoWay}"
+                      SelectionChanged="FilterAndSortChanged_OnSelectionChanged">
+
+                    <ComboBox.Items>
+                        <ComboBoxItem Content="Все диапазоны" />
+                        <ComboBoxItem Content="0 - 9,99%" />
+                        <ComboBoxItem Content="10 - 14,99%" />
+                        <ComboBoxItem Content="15% и более" />
+                    </ComboBox.Items>
+                </ComboBox>
+
+                <TextBlock Grid.Row="3"
+                       Grid.Column="0"
+                       Text="Производитель"
+                       VerticalAlignment="Center"
+                       HorizontalAlignment="Center"
+                       FontSize="25" />
+
+                <ComboBox x:Name="ManufacturesComboBox" 
+                      Grid.Row="3" 
+                      Grid.Column="1"
+                      Margin="5"
+                      SelectedIndex="0"
+                      FontSize="15"
+                      HorizontalAlignment="Stretch"
+                      VerticalAlignment="Center"
+                      ItemsSource="{Binding ManufacturersName}"
+                      SelectedItem="{Binding SelectedManufacturer, Mode=TwoWay}"
+                      SelectionChanged="FilterAndSortChanged_OnSelectionChanged" />
+            </Grid>
+        </Border>
+
+        <Button Grid.Row="0"
+                Grid.Column="0"
+                Content="Вернуться"
+                Command="{Binding ReturnBackCommand}" />
+
+        <Button Grid.Row="0" 
+                Grid.Column="1" 
+                Content="Удалить выбранные"
+                Visibility="{Binding UserRole, Converter={StaticResource UserRoleToVisibilityConverter}}"
+                IsEnabled="{Binding ButtonState}"
+                Command="{Binding DeleteProductsCommand}"/>
+
+        <TextBlock Grid.Row="0" 
+                   Grid.Column="2"
+                   FontSize="10"
+                   VerticalAlignment="Center"
+                   HorizontalAlignment="Center"
+                   Text="{Binding UserInfo, StringFormat='Пользователь: {0}'}" />
+    </Grid>
+</Window>
